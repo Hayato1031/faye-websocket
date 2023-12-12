@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Chat</title>
+</head>
+<body>
+    <input type="text" name="message" placeholder="message">
+    <button>送信</button>
+
+    <div id="messages"></div>
+
+
+    <script>
+      if (location.protocol === 'https:') {
+        var ws = new WebSocket('wss://' + location.host + '/websocket');
+      } else {
+        var ws = new WebSocket('ws://' + location.host + '/websocket');
+      }
+
+      ws.onopen = function() {
+        console.log('connected');
+      };
+
+      ws.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        var message = document.createElement('div');
+        message.innerHTML = '<strong>' + data.message + '</strong> ';
+        document.querySelector('#messages').appendChild(message);
+      };
+
+      ws.onclose = function() {
+        console.log('disconnected');
+      };
+
+      document.querySelector('button').addEventListener('click', function() {
+        var message = document.querySelector('input[name="message"]').value;
+        ws.send(JSON.stringify({
+          message: message
+        }));
+      });
+    </script>
+</body>
+</html>
